@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('College data import')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-3xl px-4 py-6">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1 class="mb-1 text-xl font-semibold">College data import</h1>
+  <p class="mb-4 text-sm text-gray-500">Loads students, staff, HODs and the Principal/Dean/Secretary accounts from the CSV files in the data folder:
+    <code class="rounded bg-gray-100 px-1" th:text="${dir}">./data</code></p>
+  <ul class="mb-5 list-inside list-disc text-sm text-gray-700">
+    <li><b>departments.csv</b>, <b>heads.csv</b>, <b>staff.csv</b>, <b>students.csv</b> - the same columns as the CSV upload in People (<a class="underline" href="/admin/formats">see formats</a>)</li>
+    <li>It is safe to run again after you edit a file (for example after filling in staff departments or tutor e-mails).</li>
+    <li>Imported people sign in with their college Google account - no passwords are created for them.</li>
+  </ul>
+  <form th:action="@{/admin/import/run}" method="post" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Importing... please wait';">
+    <button class="btn-primary" type="submit">Run import now</button>
+  </form>
+
+  <div th:if="${counts != null}" class="card mt-6 p-5">
+    <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Result</h2>
+    <ul class="space-y-1 text-sm"><li th:each="c : ${counts}"><b th:text="${c.value}">0</b> <span th:text="${c.key}">created</span></li>
+      <li th:if="${#maps.isEmpty(counts)}" class="text-gray-500">Nothing new to import.</li></ul>
+    <div th:if="${!#lists.isEmpty(errors)}" class="mt-4 max-h-56 overflow-auto rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+      <p class="mb-1 font-semibold">Notes / skipped rows</p><p th:each="e : ${errors}" th:text="${e}">error</p>
+    </div>
+  </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

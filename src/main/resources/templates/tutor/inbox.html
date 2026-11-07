@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Outpass requests')}"></head>
+<body class="bg-white text-gray-900" data-live>
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-6xl px-4 py-6">
+  <div th:replace="~{fragments :: flash}"></div>
+
+  <h1 class="mb-3 text-xl font-semibold">Needs your action <span class="ml-1 text-sm font-normal text-gray-500" th:text="'(' + ${#lists.size(needsAction)} + ')'">(0)</span></h1>
+  <div th:if="${#lists.isEmpty(needsAction)}" class="card mb-8 p-8 text-center text-sm text-gray-500">No pending requests. You are all caught up.</div>
+  <div th:unless="${#lists.isEmpty(needsAction)}" class="card mb-8 overflow-x-auto">
+    <table class="tbl">
+      <thead><tr><th>Student</th><th>Class</th><th>Date &amp; time</th><th>Reason</th><th>Via</th><th>Status</th><th></th></tr></thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr th:each="r : ${needsAction}">
+          <td><div class="font-medium" th:text="${r.student.user.fullName}">Name</div><div class="text-xs text-gray-500" th:text="${r.student.rollNumber}">Roll</div></td>
+          <td th:text="${r.classSection.label}">class</td>
+          <td><div th:text="${@fmt.date(r.permissionDate)}">date</div><div class="text-xs text-gray-500" th:text="${@fmt.time(r.exitTime)}">time</div></td>
+          <td th:text="${r.reason}">reason</td>
+          <td class="text-xs" th:text="${r.escalation.name() == 'BACKUP'} ? 'Backup' : 'Tutor'">Tutor</td>
+          <td><span th:replace="~{fragments :: badge(${r.status})}"></span></td>
+          <td class="text-right"><a class="btn-primary !py-1" th:href="@{/tutor/requests/{id}(id=${r.id})}">Review</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="mb-3 text-base font-semibold">Decided &amp; history</h2>
+  <div th:if="${#lists.isEmpty(others)}" class="card p-8 text-center text-sm text-gray-500">Nothing here yet.</div>
+  <div th:unless="${#lists.isEmpty(others)}" class="card overflow-x-auto">
+    <table class="tbl">
+      <thead><tr><th>Student</th><th>Class</th><th>Date</th><th>Reason</th><th>Decided by</th><th>Status</th><th></th></tr></thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr th:each="r : ${others}">
+          <td><div class="font-medium" th:text="${r.student.user.fullName}">Name</div><div class="text-xs text-gray-500" th:text="${r.student.rollNumber}">Roll</div></td>
+          <td th:text="${r.classSection.label}">class</td>
+          <td th:text="${@fmt.date(r.permissionDate)}">date</td>
+          <td th:text="${r.reason}">reason</td>
+          <td th:text="${r.decisionOwner != null} ? ${r.decisionOwner.fullName} : '-'">owner</td>
+          <td><span th:replace="~{fragments :: badge(${r.status})}"></span></td>
+          <td class="text-right"><a class="font-medium text-brand underline" th:href="@{/tutor/requests/{id}(id=${r.id})}">Open</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

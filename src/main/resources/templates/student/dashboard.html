@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('My outpasses')}"></head>
+<body class="bg-white text-gray-900" data-live>
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-6xl px-4 py-6">
+  <div th:replace="~{fragments :: flash}"></div>
+
+  <section class="card mb-6 flex flex-wrap items-center justify-between gap-4 p-5">
+    <div class="flex items-center gap-4">
+      <div th:replace="~{fragments :: avatar(${student.user.fullName}, ${student.rollNumber}, 56)}"></div>
+      <div>
+        <h1 class="text-lg font-semibold" th:text="${student.user.fullName}">Student</h1>
+        <p class="text-sm text-gray-600">
+          <span class="font-medium" th:text="${student.rollNumber}">ROLL</span> &middot;
+          <span th:text="${student.classSection.department.code}">CSE</span> &middot;
+          Year <span th:text="${student.classSection.academicYear}">1</span>, Sem <span th:text="${student.classSection.semester}">1</span>,
+          Section <span th:text="${student.classSection.section}">A</span>
+        </p>
+      </div>
+    </div>
+    <a th:href="@{/student/new}" class="btn-primary">+ New outpass request</a>
+  </section>
+
+  <section class="card mb-6 p-4">
+    <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Your tutors</h2>
+    <p th:if="${#lists.isEmpty(tutors)}" class="text-sm text-gray-500">No tutors assigned to your class yet.</p>
+    <ul class="grid gap-2 text-sm md:grid-cols-2">
+      <li th:each="t : ${tutors}"><span class="font-medium" th:text="${t.user.fullName}">Tutor</span><br>
+        <span class="text-gray-600"><span th:text="${t.phone != null} ? ${t.phone} : 'no phone on file'">phone</span> &middot; <span th:text="${t.user.email}">email</span></span></li>
+    </ul>
+    <p class="mt-2 text-xs text-gray-500">Your contact: <span th:text="${student.user.email}">email</span> &middot; <span th:text="${student.phone != null} ? ${student.phone} : '-'">phone</span></p>
+  </section>
+
+  <h2 class="mb-3 text-base font-semibold">Outpass history</h2>
+  <div th:if="${#lists.isEmpty(requests)}" class="card p-10 text-center text-sm text-gray-500">
+    You have not requested any outpass yet.
+  </div>
+  <div th:unless="${#lists.isEmpty(requests)}" class="card overflow-x-auto">
+    <table class="tbl">
+      <thead><tr><th>Outpass</th><th>Date</th><th>Planned exit</th><th>Valid until</th><th>Reason</th><th>Status</th><th></th></tr></thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr th:each="r : ${requests}">
+          <td class="font-medium" th:text="${r.outpassCode}">OP-2026-000001</td>
+          <td th:text="${@fmt.date(r.permissionDate)}">date</td>
+          <td th:text="${@fmt.time(r.exitTime)}">time</td>
+          <td th:text="${@fmt.hm(r.expiresAt)}">time</td>
+          <td th:text="${r.reason}">reason</td>
+          <td><span th:replace="~{fragments :: badge(${r.status})}"></span></td>
+          <td class="text-right"><a class="font-medium text-brand underline" th:href="@{/student/requests/{id}(id=${r.id})}">Open</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

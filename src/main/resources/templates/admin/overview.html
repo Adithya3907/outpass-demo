@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Admin')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-6xl px-4 py-6">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1 class="mb-5 text-xl font-semibold">Administration</h1>
+  <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+    <div class="card p-4"><p class="text-xs uppercase text-gray-500">Students</p><p class="text-2xl font-semibold" th:text="${students}">0</p></div>
+    <div class="card p-4"><p class="text-xs uppercase text-gray-500">Faculty</p><p class="text-2xl font-semibold" th:text="${tutors}">0</p></div>
+    <div class="card p-4"><p class="text-xs uppercase text-gray-500">Security</p><p class="text-2xl font-semibold" th:text="${security}">0</p></div>
+    <div class="card p-4"><p class="text-xs uppercase text-gray-500">Classes</p><p class="text-2xl font-semibold" th:text="${classCount}">0</p></div>
+    <div class="card p-4"><p class="text-xs uppercase text-gray-500">Pending requests</p><p class="text-2xl font-semibold" th:text="${pending}">0</p></div>
+    <div class="card p-4"><p class="text-xs uppercase text-gray-500">Approved, unused</p><p class="text-2xl font-semibold" th:text="${approved}">0</p></div>
+    <div class="card p-4"><p class="text-xs uppercase text-gray-500">Exits recorded</p><p class="text-2xl font-semibold" th:text="${used}">0</p></div>
+  </div>
+  <div class="mt-8 grid gap-3 text-sm md:grid-cols-3">
+    <a class="card p-4 hover:bg-gray-50" th:href="@{/admin/structure}"><b>1. Structure</b><br><span class="text-gray-500">Departments, classes, gates</span></a>
+    <a class="card p-4 hover:bg-gray-50" th:href="@{/admin/users}"><b>2. Users</b><br><span class="text-gray-500">Faculty, students, security, CSV import</span></a>
+    <a class="card p-4 hover:bg-gray-50" th:href="@{/admin/assignments}"><b>3. Assignments</b><br><span class="text-gray-500">Two tutors per class and the HOD</span></a>
+  </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

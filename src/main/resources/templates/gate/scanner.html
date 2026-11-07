@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Gate scanner')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-5xl px-4 py-6">
+  <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h1 class="text-xl font-semibold">Gate verification</h1>
+      <p class="text-sm text-gray-500">Scan the student's QR with the USB scanner. The field below always stays ready.</p>
+    </div>
+    <div>
+      <label class="label" for="gateId">Gate</label>
+      <select class="input !w-56" id="gateId" form="scanForm" name="gateId">
+        <option th:each="g : ${gates}" th:value="${g.id}" th:text="${g.name}">Main Gate</option>
+      </select>
+    </div>
+  </div>
+
+  <form id="scanForm" th:action="@{/gate/scan}" th:attr="hx-post=@{/gate/scan}" hx-target="#result" hx-swap="outerHTML" method="post" autocomplete="off">
+    <input id="token" name="token" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus
+           class="input !py-4 text-center font-mono text-lg" placeholder="Waiting for QR scan...">
+  </form>
+
+  <section th:if="${demoPasses != null}" class="card mt-6 p-4">
+    <h2 class="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500">Demo: approved passes you can scan</h2>
+    <p class="mb-3 text-xs text-gray-500">In real life the USB scanner reads the QR on the student's phone and types the code into the box above. Here, press Scan.</p>
+    <p th:if="${#lists.isEmpty(demoPasses)}" class="text-sm text-gray-500">No approved passes right now. Enter as Student, make a request, then approve it as Tutor.</p>
+    <ul class="space-y-2 text-sm">
+      <li th:each="p : ${demoPasses}" class="flex items-center justify-between gap-3">
+        <span><b th:text="${p.student.user.fullName}">Name</b> &middot; planned exit <span th:text="${@fmt.time(p.exitTime)}">10:00 AM</span> &middot; <span th:text="${p.reason}">reason</span></span>
+        <button type="button" class="btn-primary demo-scan !py-1" th:attr="data-token=${p.qrToken}">Scan</button>
+      </li>
+    </ul>
+  </section>
+
+  <div id="result" class="mt-6 rounded-lg border border-dashed border-gray-300 p-10 text-center text-gray-400" data-ok="">
+    Ready for the next student
+  </div>
+
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+<script th:src="@{/js/scanner.js}"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Student search')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-4xl px-4 py-6">
+  <h1 class="mb-4 text-xl font-semibold">Search students</h1>
+  <form method="get" th:action="@{/gate/students}" class="mb-5 flex gap-2">
+    <input class="input" name="q" th:value="${q}" placeholder="Name or roll number" autofocus>
+    <button class="btn-primary" type="submit">Search</button>
+  </form>
+  <div class="card overflow-x-auto" th:if="${!#lists.isEmpty(results)}">
+    <table class="tbl">
+      <thead><tr><th>Student</th><th>Roll number</th><th>Class</th><th></th></tr></thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr th:each="s : ${results}">
+          <td><div class="flex items-center gap-3"><div th:replace="~{fragments :: avatar(${s.user.fullName}, ${s.rollNumber}, 32)}"></div><span class="font-medium" th:text="${s.user.fullName}">Name</span></div></td>
+          <td th:text="${s.rollNumber}">roll</td>
+          <td th:text="${s.classSection.label}">class</td>
+          <td class="text-right"><a class="font-medium text-brand underline" th:href="@{/gate/students/{id}(id=${s.id})}">Exit records</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p th:if="${#lists.isEmpty(results) and q != ''}" class="text-sm text-gray-500">No students found.</p>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

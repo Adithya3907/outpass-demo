@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('All requests')}"></head>
+<body class="bg-white text-gray-900" data-live>
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-6xl px-4 py-6">
+  <h1 class="text-xl font-semibold">Institution overview</h1>
+  <p class="mb-4 text-sm text-gray-500">All departments &middot; view only &middot; latest 200 matching requests</p>
+  <form method="get" th:action="@{/head}" class="mb-4 flex flex-wrap items-end gap-3">
+    <div><label class="label" for="dept">Department</label>
+      <select class="input" id="dept" name="dept"><option value="">All</option>
+        <option th:each="d : ${departments}" th:value="${d.code}" th:text="${d.code}" th:selected="${selectedDept == d.code}">CSE</option></select></div>
+    <div><label class="label" for="status">Status</label>
+      <select class="input" id="status" name="status"><option value="">All</option>
+        <option th:each="s : ${statuses}" th:value="${s.name()}" th:text="${s.label}" th:selected="${selectedStatus == s.name()}">Status</option></select></div>
+    <div class="min-w-[14rem] flex-1"><label class="label" for="q">Student name / register no.</label><input class="input" id="q" name="q" th:value="${q}"></div>
+    <button class="btn-primary" type="submit">Filter</button>
+    <a class="btn-outline" th:href="@{/export/requests.csv(dept=${selectedDept},status=${selectedStatus},q=${q})}">Download records (CSV)</a>
+    <a class="btn-outline" th:href="@{/export/students.csv(dept=${selectedDept})}">Download students (CSV)</a>
+    <a class="btn-outline" th:href="@{/export/staff.csv(dept=${selectedDept})}">Download staff (CSV)</a>
+  </form>
+  <div class="card overflow-x-auto">
+    <table class="tbl">
+      <thead><tr><th>Student</th><th>Class</th><th>Planned exit</th><th>Reason</th><th>Handled by</th><th>Status</th><th></th></tr></thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr th:each="r : ${list}">
+          <td><div class="font-medium" th:text="${r.student.user.fullName}">Name</div><div class="text-xs text-gray-500" th:text="${r.student.rollNumber}">Roll</div></td>
+          <td th:text="${r.classSection.label}">class</td>
+          <td><div th:text="${@fmt.date(r.permissionDate)}">date</div><div class="text-xs text-gray-500" th:text="${@fmt.time(r.exitTime)}">time</div></td>
+          <td th:text="${r.reason}">reason</td>
+          <td th:text="${r.approvingFaculty != null} ? ${r.approvingFaculty.fullName} : '-'">faculty</td>
+          <td><span th:replace="~{fragments :: badge(${r.status})}"></span></td>
+          <td class="text-right"><a class="font-medium text-brand underline" th:href="@{/head/requests/{id}(id=${r.id})}">Open</a></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(list)}"><td colspan="7" class="py-8 text-center text-gray-500">No matching requests.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

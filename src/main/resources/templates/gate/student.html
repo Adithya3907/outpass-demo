@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Student exit records')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-4xl px-4 py-6">
+  <a th:href="@{/gate/students}" class="text-sm text-brand underline">&larr; Search</a>
+  <section class="card mb-6 mt-3 flex items-center gap-4 p-5">
+    <div th:replace="~{fragments :: avatar(${student.user.fullName}, ${student.rollNumber}, 64)}"></div>
+    <div>
+      <h1 class="text-lg font-semibold" th:text="${student.user.fullName}">Name</h1>
+      <p class="text-sm text-gray-600"><span th:text="${student.rollNumber}">roll</span> &middot; <span th:text="${student.classSection.label}">class</span></p>
+    </div>
+  </section>
+  <div class="card overflow-x-auto">
+    <table class="tbl">
+      <thead><tr><th>Time</th><th>Outpass</th><th>Gate</th><th>Result</th><th>Details</th></tr></thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr th:each="s : ${scans}">
+          <td th:text="${@fmt.dt(s.scannedAt)}">time</td>
+          <td th:text="${s.request.outpassCode}">code</td>
+          <td th:text="${s.gate != null} ? ${s.gate.name} : '-'">gate</td>
+          <td><span class="badge" th:classappend="${s.result.name() == 'SUCCESS'} ? 'bg-green-50 text-green-800 border-green-200' : 'bg-red-50 text-red-800 border-red-200'" th:text="${s.result.name()}">SUCCESS</span></td>
+          <td th:text="${s.reason != null} ? ${s.reason} : ''">reason</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(scans)}"><td colspan="5" class="py-8 text-center text-gray-500">No gate records.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

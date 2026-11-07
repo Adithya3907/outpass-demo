@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Outpass</title>
+  <style>
+    @page { size: A4; margin: 16mm; }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 11pt; color: #111111; }
+    .head { border-bottom: 3px solid #1e3a8a; padding-bottom: 8px; margin-bottom: 14px; }
+    .head img { height: 52px; }
+    h1 { font-size: 17pt; color: #1e3a8a; margin: 0 0 2px 0; }
+    .sub { color: #555555; font-size: 9.5pt; }
+    table.kv { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    table.kv td { padding: 6px 8px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    table.kv td.k { width: 36%; color: #555555; }
+    table.kv td.v { font-weight: bold; }
+    .qrbox { text-align: center; margin-top: 18px; }
+    .qrbox img { width: 200px; height: 200px; border: 1px solid #d1d5db; padding: 6px; }
+    .warn { margin-top: 12px; border: 2px solid #b91c1c; background: #fef2f2; padding: 8px 10px; }
+    .warn b { color: #991b1b; }
+    .used { text-align: center; color: #065f46; border: 2px solid #059669; padding: 10px; margin-top: 18px; font-weight: bold; }
+    .foot { margin-top: 16px; font-size: 8.5pt; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="head">
+    <img th:src="${logo}" alt="College logo" />
+  </div>
+  <h1>Campus Exit Outpass</h1>
+  <div class="sub" th:text="${collegeName}">College</div>
+
+  <table class="kv">
+    <tr><td class="k">Outpass ID</td><td class="v" th:text="${r.outpassCode}">OP</td></tr>
+    <tr><td class="k">Student</td><td class="v" th:text="${r.student.user.fullName}">Name</td></tr>
+    <tr><td class="k">Roll number</td><td class="v" th:text="${r.student.rollNumber}">Roll</td></tr>
+    <tr><td class="k">Department / Year / Section</td><td class="v" th:text="${r.classSection.department.code + ' / Year ' + r.classSection.academicYear + ' / ' + r.classSection.section}">CSE</td></tr>
+    <tr><td class="k">Reason for leaving</td><td class="v" th:text="${r.reason}">Reason</td></tr>
+    <tr><td class="k">Permission date</td><td class="v" th:text="${fmt.date(r.permissionDate)}">date</td></tr>
+    <tr><td class="k">Planned exit time</td><td class="v" th:text="${fmt.time(r.exitTime)}">time</td></tr>
+    <tr><td class="k">QR valid until</td><td class="v" th:text="${fmt.dt(r.expiresAt)}">time</td></tr>
+    <tr><td class="k">Assigned tutors</td><td class="v" th:text="${r.assignedTutorNames != null and r.assignedTutorNames != ''} ? ${r.assignedTutorNames} : '-'">tutors</td></tr>
+    <tr><td class="k">Approved by</td><td class="v" th:text="${r.decisionOwner != null} ? ${r.decisionOwner.fullName} : '-'">faculty</td></tr>
+    <tr th:if="${r.hodApprover != null}"><td class="k">HOD approval</td><td class="v" th:text="${r.hodApprover.fullName + ' on ' + fmt.dt(r.hodDecidedAt)}">HOD</td></tr>
+    <tr><td class="k">Approval timestamp</td><td class="v" th:text="${fmt.dt(r.approvedAt)}">time</td></tr>
+  </table>
+
+  <div class="qrbox" th:if="${qr != null and r.status.name() == 'APPROVED'}">
+    <img th:src="${qr}" alt="QR" />
+    <div class="sub">Present this QR code to the security desk. Valid for a single exit.</div>
+  </div>
+  <div class="used" th:if="${r.status.name() == 'USED'}" th:text="${'This outpass was used at the college gate on ' + fmt.dt(r.usedAt)}">Used</div>
+
+  <div class="warn">
+    <b>IMPORTANT SECURITY WARNING</b><br />
+    Do not share your QR code, screenshot or digital outpass with anyone else. This QR is uniquely assigned to your permission and can authorize your campus exit. Display it only to authorized college security personnel.
+  </div>
+  <div class="foot">
+    Verification: this document is not the source of truth. The live college database is checked at the gate; a revoked, expired or already-used pass will be rejected.
+  </div>
+</body>
+</html>

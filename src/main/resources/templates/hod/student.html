@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Student history')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-5xl px-4 py-6">
+  <a th:href="@{/hod/students}" class="text-sm text-brand underline">&larr; Student search</a>
+  <section class="card mb-6 mt-3 flex items-center gap-4 p-5">
+    <div th:replace="~{fragments :: avatar(${student.user.fullName}, ${student.rollNumber}, 64)}"></div>
+    <div>
+      <h1 class="text-lg font-semibold" th:text="${student.user.fullName}">Name</h1>
+      <p class="text-sm text-gray-600"><span th:text="${student.rollNumber}">roll</span> &middot; <span th:text="${student.classSection.label}">class</span>
+        <span th:if="${student.phone != null}"> &middot; <span th:text="${student.phone}">phone</span></span></p>
+      <p class="text-sm text-gray-500" th:text="${student.user.email}">email</p>
+    </div>
+  </section>
+
+  <h2 class="mb-3 text-base font-semibold">Outpass history</h2>
+  <div class="card mb-8 overflow-x-auto">
+    <table class="tbl">
+      <thead><tr><th>Outpass</th><th>Date</th><th>Reason</th><th>Handled by</th><th>Revisions</th><th>Status</th><th></th></tr></thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr th:each="r : ${history}">
+          <td class="font-medium" th:text="${r.outpassCode}">code</td>
+          <td th:text="${@fmt.date(r.permissionDate)}">date</td>
+          <td th:text="${r.reason}">reason</td>
+          <td th:text="${r.approvingFaculty != null} ? ${r.approvingFaculty.fullName} : '-'">faculty</td>
+          <td th:text="${r.revisionCount}">0</td>
+          <td><span th:replace="~{fragments :: badge(${r.status})}"></span></td>
+          <td class="text-right"><a class="font-medium text-brand underline" th:href="@{/hod/requests/{id}(id=${r.id})}">Open</a></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(history)}"><td colspan="7" class="py-6 text-center text-gray-500">No outpass requests.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="mb-3 text-base font-semibold">Gate scan log</h2>
+  <div class="card overflow-x-auto">
+    <table class="tbl">
+      <thead><tr><th>Time</th><th>Gate</th><th>Result</th><th>Details</th></tr></thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr th:each="s : ${scans}">
+          <td th:text="${@fmt.dt(s.scannedAt)}">time</td>
+          <td th:text="${s.gate != null} ? ${s.gate.name} : '-'">gate</td>
+          <td><span class="badge" th:classappend="${s.result.name() == 'SUCCESS'} ? 'bg-green-50 text-green-800 border-green-200' : 'bg-red-50 text-red-800 border-red-200'" th:text="${s.result.name()}">SUCCESS</span></td>
+          <td th:text="${s.reason != null} ? ${s.reason} : ${s.request.outpassCode}">detail</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(scans)}"><td colspan="4" class="py-6 text-center text-gray-500">No gate scans.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

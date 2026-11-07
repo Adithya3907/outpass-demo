@@ -1,0 +1,71 @@
+spring:
+  application:
+    name: psgitech-outpass
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/outpass}
+    username: ${DB_USER:outpass}
+    password: ${DB_PASSWORD:outpass}
+    hikari:
+      maximum-pool-size: 10
+      leak-detection-threshold: 30000   # logs a stack trace if any connection is held >30 s
+  jpa:
+    hibernate:
+      ddl-auto: none          # schema is owned by Flyway
+    open-in-view: false         # replaced by WebConfig (OSIV for normal pages, NOT for /events)
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  thymeleaf:
+    cache: ${THYMELEAF_CACHE:true}
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USER:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      timeout: 8h
+      cookie:
+        http-only: true
+        same-site: ${SESSION_SAMESITE:lax}
+        secure: ${SESSION_SECURE:false}
+
+outpass:
+  college-name: PSG Institute of Technology and Applied Research
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+  max-days-ahead: 2            # Today, Tomorrow, Day After Tomorrow
+  max-revisions: 2             # tutor may revise a decision twice
+  validity-minutes: 75         # a pass works from the planned exit time until exit time + 75 min
+  scan-early-minutes: 120      # the QR already works this many minutes BEFORE the planned exit time (2 h)
+  student-default-password: ${STUDENT_DEFAULT_PASSWORD:test@123}                 # new / reset student accounts (must be changed at first login)
+  staff-default-password: ${STAFF_DEFAULT_PASSWORD:NonStudent@credential}       # every non-student role
+  google-client-id: ${GOOGLE_CLIENT_ID:}           # Google sign-in is switched on when these two are set
+  google-client-secret: ${GOOGLE_CLIENT_SECRET:}
+  google-domain: ${GOOGLE_DOMAIN:psgitech.ac.in}   # only accounts of this college domain may sign in
+  demo-mode: ${DEMO_MODE:false}                     # PUBLIC DEMO: fake data, one-click role login, auto reset
+  demo-reset-minutes: ${DEMO_RESET_MINUTES:30}
+  seed-test-accounts: ${SEED_TEST_ACCOUNTS:true}        # creates teststudent@/testtutor@/... accounts - set false in production
+  import-dir: ${IMPORT_DIR:./data}                     # CSV files for the one-click college data import
+  photo-dir: ${PHOTO_DIR:./photos}                     # files named <ROLLNUMBER>.jpg
+  mail-enabled: ${MAIL_ENABLED:false}
+  mail-from: ${MAIL_FROM:no-reply@localhost}
+  admin-name: System Administrator
+  admin-email: ${ADMIN_EMAIL:admin@psgitech.local}
+  admin-password: ${ADMIN_PASSWORD:}
+
+logging:
+  level:
+    root: INFO
+    edu.psgitech: INFO

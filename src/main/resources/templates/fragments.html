@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${title} + ' | PSGiTech Outpass'">Outpass</title>
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="color-scheme" content="light">
+  <link rel="manifest" th:href="@{/manifest.webmanifest}">
+  <link rel="icon" type="image/png" th:href="@{/icons/icon-192.png}">
+  <link rel="apple-touch-icon" th:href="@{/icons/icon-192.png}">
+  <link rel="stylesheet" th:href="@{/css/tailwind.css}">
+  <script th:src="@{/js/htmx.min.js}"></script>
+  <script th:src="@{/js/app.js}" defer></script>
+</head>
+<body>
+
+<div th:fragment="demoBanner" th:if="${demoMode}" class="bg-amber-400 px-3 py-2 text-center text-sm font-semibold text-gray-900">
+  PUBLIC DEMO - fictional data only
+  <span th:if="${demoNextReset != null}"> &middot; resets in <span id="demoReset" th:attr="data-reset=${demoNextReset}">&hellip;</span></span>
+  &middot; <a class="underline" th:href="@{/demo}">Switch role</a>
+  <form th:action="@{/demo/reset}" method="post" class="ml-2 inline" onsubmit="return confirm('Clear ALL demo data now and reload fresh sample data?');">
+    <button type="submit" class="rounded bg-gray-900 px-2 py-0.5 text-xs font-semibold text-white hover:bg-black">Clear all data now</button>
+  </form>
+</div>
+
+<header th:fragment="nav" class="border-b border-gray-200 bg-white">
+  <div th:replace="~{:: demoBanner}"></div>
+  <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+    <a th:href="@{/}" class="flex items-center gap-3">
+      <img th:src="@{/img/psgitech-logo.png}" alt="PSG Institute of Technology and Applied Research" class="h-10 w-auto">
+      <span class="hidden border-l border-gray-300 pl-3 text-sm font-semibold text-brand md:block">Outpass Portal</span>
+    </a>
+    <nav th:if="${me != null}" class="flex flex-wrap items-center gap-1 text-sm">
+      <th:block th:switch="${me.role.name()}">
+        <th:block th:case="'STUDENT'">
+          <a class="navlink" th:href="@{/student}">Dashboard</a>
+          <a class="navlink" th:href="@{/student/new}">New request</a>
+        </th:block>
+        <th:block th:case="'TUTOR'">
+          <a class="navlink" th:href="@{/tutor}">Requests</a>
+        </th:block>
+        <th:block th:case="'HOD'">
+          <a class="navlink" th:href="@{/hod}">Approvals</a>
+          <a class="navlink" th:href="@{/hod/students}">Students</a>
+          <a class="navlink" th:href="@{/hod/reports}">Reports</a>
+        </th:block>
+        <th:block th:case="'HEAD'">
+          <a class="navlink" th:href="@{/head}">All requests</a>
+          <a class="navlink" th:href="@{/head/students}">Students</a>
+          <a class="navlink" th:href="@{/head/reports}">Reports</a>
+        </th:block>
+        <th:block th:case="'SECURITY'">
+          <a class="navlink" th:href="@{/gate}">Scanner</a>
+          <a class="navlink" th:href="@{/gate/logs}">Exit logs</a>
+          <a class="navlink" th:href="@{/gate/students}">Students</a>
+        </th:block>
+        <th:block th:case="'ADMIN'">
+          <a class="navlink" th:href="@{/admin}">Overview</a>
+          <a class="navlink" th:href="@{/admin/users}">Users</a>
+          <a class="navlink" th:href="@{/admin/structure}">Structure</a>
+          <a class="navlink" th:href="@{/admin/assignments}">Assignments</a>
+          <a class="navlink" th:href="@{/admin/import}">Import</a>
+          <a class="navlink" th:href="@{/admin/cleanup}">Cleanup</a>
+          <a class="navlink" th:href="@{/admin/audit}">Audit</a>
+        </th:block>
+      </th:block>
+      <a class="navlink" th:href="@{/notifications}">Notifications
+        <span th:if="${unread != null and unread > 0}" class="ml-1 rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-semibold text-white" th:text="${unread}">1</span>
+      </a>
+      <a class="navlink font-medium" th:href="@{/account/profile}" th:text="${me.fullName}" title="My account and notification settings">Name</a>
+      <form th:action="@{/logout}" method="post" class="inline">
+        <button type="submit" class="navlink">Sign out</button>
+      </form>
+    </nav>
+  </div>
+  <div th:if="${me != null and me.mustChangePassword}" class="border-t border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900">
+    You are using a temporary password.
+    <a class="font-semibold underline" th:href="@{/account/password}">Change it now</a>.
+  </div>
+</header>
+
+<div th:fragment="flash">
+  <div th:if="${msg}" class="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800" th:text="${msg}"></div>
+  <div th:if="${err}" class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" th:text="${err}"></div>
+  <div th:if="${error}" class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" th:text="${error}"></div>
+</div>
+
+<footer th:fragment="footer" class="mt-10 border-t border-gray-200 py-5 text-center text-xs text-gray-500">
+  <span th:text="${collegeName}">College</span> &middot; Digital Outpass Management System
+</footer>
+
+<div th:fragment="avatar(name, roll, size)"
+     class="relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-light font-semibold text-brand"
+     th:style="|width:${size}px;height:${size}px;font-size:${size / 3}px|">
+  <span th:text="${@fmt.initials(name)}">AB</span>
+  <img th:src="@{/photos/{r}(r=${roll})}" alt="" class="absolute inset-0 h-full w-full object-cover" onerror="this.remove()">
+</div>
+
+<span th:fragment="badge(status)" class="badge" th:classappend="${status.badgeClass}" th:text="${status.label}">Status</span>
+
+</body>
+</html>

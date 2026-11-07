@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Reports')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-4xl px-4 py-6">
+  <h1 class="text-xl font-semibold">Department report</h1>
+  <p class="mb-5 text-sm text-gray-500"><span th:text="${dept.name}">Dept</span> &middot; <span th:text="${total}">0</span> requests in total</p>
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <section class="card p-5">
+      <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">By status</h2>
+      <ul class="space-y-2 text-sm">
+        <li th:each="row : ${statusRows}" class="flex items-center justify-between"><span th:text="${row.label}">label</span><span class="font-semibold" th:text="${row.count}">0</span></li>
+      </ul>
+    </section>
+    <section class="card p-5">
+      <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">By class</h2>
+      <ul class="space-y-2 text-sm">
+        <li th:each="row : ${classRows}" class="flex items-center justify-between"><span th:text="${row.label}">label</span><span class="font-semibold" th:text="${row.count}">0</span></li>
+        <li th:if="${#lists.isEmpty(classRows)}" class="text-gray-500">No data yet.</li>
+      </ul>
+    </section>
+  </div>
+  <button type="button" onclick="window.print()" class="btn-outline mt-6">Print report</button>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

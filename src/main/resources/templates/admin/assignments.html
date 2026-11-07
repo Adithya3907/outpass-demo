@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Assignments')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-6xl px-4 py-6">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1 class="mb-5 text-xl font-semibold">Tutor and HOD assignments</h1>
+
+  <section class="card mb-6 p-4">
+    <h2 class="mb-3 text-sm font-semibold">Primary tutors (two per class, same department)</h2>
+    <form th:action="@{/admin/assignments/tutor}" method="post" class="mb-4 grid gap-2 md:grid-cols-3">
+      <select class="input" name="classId" required><option value="">Class</option><option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.label}">class</option></select>
+      <select class="input" name="facultyId" required><option value="">Faculty</option><option th:each="f : ${faculty}" th:value="${f.id}" th:text="${f.department.code + ' - ' + f.user.fullName}">faculty</option></select>
+      <button class="btn-primary" type="submit">Assign tutor</button>
+    </form>
+    <div class="overflow-x-auto"><table class="tbl">
+      <thead><tr><th>Class</th><th>Tutor</th><th>From</th><th>Until</th><th></th></tr></thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr th:each="t : ${tutorAssignments}">
+          <td th:text="${t.classSection.label}">class</td>
+          <td th:text="${t.faculty.user.fullName}">tutor</td>
+          <td th:text="${t.effectiveFrom}">from</td>
+          <td th:text="${t.effectiveTo != null} ? ${t.effectiveTo} : 'Active'">Active</td>
+          <td class="text-right"><form th:if="${t.effectiveTo == null or !t.effectiveTo.isBefore(today)}" th:action="@{/admin/assignments/tutor/{id}/end(id=${t.id})}" method="post" onsubmit="return confirm('End this tutor assignment?');"><button class="text-xs text-red-700 underline" type="submit">End</button></form></td>
+        </tr>
+      </tbody></table></div>
+  </section>
+
+  <p class="mb-4 text-sm text-gray-500">Backup tutors need no setup: they are automatically the other tutors of the same department.</p>
+  <div class="grid gap-6">
+    <section class="card p-4">
+      <h2 class="mb-3 text-sm font-semibold">Head of Department</h2>
+      <form th:action="@{/admin/assignments/hod}" method="post" class="mb-3 flex gap-2">
+        <select class="input" name="facultyId" required><option value="">Faculty</option><option th:each="f : ${faculty}" th:value="${f.id}" th:text="${f.department.code + ' - ' + f.user.fullName}">faculty</option></select>
+        <button class="btn-primary" type="submit">Set as HOD</button>
+      </form>
+      <p class="mb-2 text-xs text-gray-500">Setting a new HOD replaces the previous one for that department.</p>
+      <ul class="space-y-1 text-sm"><li th:each="h : ${hodList}"><b th:text="${h.department.code}">CSE</b> &ndash; <span th:text="${h.faculty.user.fullName}">name</span></li></ul>
+    </section>
+  </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

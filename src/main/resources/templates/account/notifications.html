@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Notification settings')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-2xl px-4 py-6">
+  <div th:replace="~{fragments :: flash}"></div>
+  <a th:href="@{/account/profile}" class="text-sm text-brand underline">&larr; My account</a>
+  <h1 class="mb-1 mt-3 text-xl font-semibold">Notification settings</h1>
+  <p class="mb-5 text-sm text-gray-500">Everything always appears in the Notifications page. Here you choose what is also pushed to your phone and sent by e-mail.</p>
+
+  <section class="card mb-6 p-5">
+    <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">This device</h2>
+    <p id="pushStatus" class="mb-3 text-sm text-gray-700">Checking...</p>
+    <div class="flex flex-wrap gap-2">
+      <button type="button" id="pushEnable" class="btn-primary hidden">Enable notifications on this device</button>
+      <button type="button" id="pushTest" class="btn-outline hidden">Send test notification</button>
+      <button type="button" id="pushDisable" class="btn-danger hidden">Turn off on this device</button>
+    </div>
+    <p class="mt-3 text-xs text-gray-500">Registered devices: <b th:text="${devices}">0</b>. On iPhone, first use Share &rarr; Add to Home Screen, then open the app from the home screen and enable here. Alerts to other devices need HTTPS.</p>
+    <div id="pushConfig" class="hidden" th:attr="data-key=${vapidKey},data-csrf=${_csrf != null} ? ${_csrf.token} : '',data-header=${_csrf != null} ? ${_csrf.headerName} : 'X-CSRF-TOKEN'"></div>
+  </section>
+
+  <form th:action="@{/account/notifications}" method="post" class="card space-y-1 p-5">
+    <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">What to notify me about</h2>
+    <div th:if="${#lists.isEmpty(rows)}" class="text-sm text-gray-500">No notification categories apply to your role.</div>
+    <div th:each="row : ${rows}" class="flex items-start justify-between gap-4 border-b border-gray-100 py-3 last:border-0">
+      <div>
+        <p class="font-medium" th:text="${row.type.label}">Label</p>
+        <p class="text-sm text-gray-500" th:text="${row.type.description}">desc</p>
+      </div>
+      <div class="flex shrink-0 gap-4 text-sm">
+        <label class="flex items-center gap-1"><input type="checkbox" th:name="${'push_' + row.type.name()}" th:checked="${row.push}"> Phone</label>
+        <label class="flex items-center gap-1" th:classappend="${!mailEnabled} ? 'opacity-40'"><input type="checkbox" th:name="${'email_' + row.type.name()}" th:checked="${row.email}"> E-mail</label>
+      </div>
+    </div>
+    <p th:if="${!mailEnabled}" class="pt-2 text-xs text-gray-500">E-mail delivery is not switched on by the college server yet.</p>
+    <button th:unless="${#lists.isEmpty(rows)}" class="btn-primary mt-3" type="submit">Save settings</button>
+  </form>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+<script th:src="@{/js/push.js}"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Notifications')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-3xl px-4 py-6">
+  <h1 class="mb-4 text-xl font-semibold">Notifications</h1>
+  <div th:if="${#lists.isEmpty(items)}" class="card p-8 text-center text-sm text-gray-500">No notifications yet.</div>
+  <ul class="space-y-2">
+    <li th:each="n : ${items}" class="card p-4" th:classappend="${!n.seen} ? 'border-brand bg-brand-light/40'">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="font-medium" th:text="${n.title}">Title</p>
+          <p class="mt-0.5 text-sm text-gray-600" th:text="${n.message}">Message</p>
+          <a th:if="${n.link != null}" th:href="@{${n.link}}" class="mt-1 inline-block text-sm font-medium text-brand underline">Open</a>
+        </div>
+        <span class="shrink-0 text-xs text-gray-500" th:text="${@fmt.dt(n.createdAt)}">time</span>
+      </div>
+    </li>
+  </ul>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

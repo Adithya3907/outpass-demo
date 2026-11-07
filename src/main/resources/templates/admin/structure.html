@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Structure')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-6xl px-4 py-6">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1 class="mb-5 text-xl font-semibold">Departments, classes and gates</h1>
+  <div class="grid gap-6 lg:grid-cols-3">
+    <section class="card p-4">
+      <h2 class="mb-3 text-sm font-semibold">Departments</h2>
+      <ul class="mb-4 space-y-1 text-sm"><li th:each="d : ${departments}"><b th:text="${d.code}">CSE</b> &ndash; <span th:text="${d.name}">name</span></li></ul>
+      <form th:action="@{/admin/departments}" method="post" class="space-y-2">
+        <input class="input" name="code" placeholder="Code (e.g. CSE)" required>
+        <input class="input" name="name" placeholder="Full name" required>
+        <button class="btn-primary w-full" type="submit">Add department</button>
+      </form>
+    </section>
+    <section class="card p-4">
+      <h2 class="mb-3 text-sm font-semibold">Classes / sections</h2>
+      <ul class="mb-4 max-h-48 space-y-1 overflow-auto text-sm"><li th:each="c : ${classes}"><span th:text="${c.label}">class</span> <span class="text-gray-500" th:text="'(Sem ' + ${c.semester} + ')'"></span></li></ul>
+      <form th:action="@{/admin/classes}" method="post" class="grid grid-cols-3 gap-2">
+        <select class="input col-span-3" name="deptId" required><option value="">Department</option><option th:each="d : ${departments}" th:value="${d.id}" th:text="${d.code}">dept</option></select>
+        <input class="input" type="number" min="1" max="4" name="year" placeholder="Year" required>
+        <input class="input" name="section" placeholder="Sec" maxlength="10" required>
+        <input class="input" type="number" min="1" max="8" name="semester" placeholder="Sem" required>
+        <button class="btn-primary col-span-3" type="submit">Add class</button>
+      </form>
+    </section>
+    <section class="card p-4">
+      <h2 class="mb-3 text-sm font-semibold">Gates</h2>
+      <ul class="mb-4 space-y-2 text-sm">
+        <li th:each="g : ${gates}" class="flex items-center justify-between">
+          <span th:text="${g.name}">Main Gate</span>
+          <form th:action="@{/admin/gates/{id}/toggle(id=${g.id})}" method="post"><button class="text-xs underline" th:classappend="${g.active} ? 'text-red-700' : 'text-brand'" th:text="${g.active} ? 'Disable' : 'Enable'" type="submit">Disable</button></form>
+        </li>
+      </ul>
+      <form th:action="@{/admin/gates}" method="post" class="space-y-2">
+        <input class="input" name="name" placeholder="Gate name" required>
+        <button class="btn-primary w-full" type="submit">Add gate</button>
+      </form>
+    </section>
+  </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

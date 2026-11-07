@@ -1,0 +1,8 @@
+target/
+.env
+photos/*
+!photos/.gitkeep
+.idea/
+*.iml
+.vscode/
+data/

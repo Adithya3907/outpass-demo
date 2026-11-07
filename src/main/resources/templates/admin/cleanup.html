@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Data cleanup')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-4xl px-4 py-6">
+  <div th:replace="~{fragments :: flash}"></div>
+  <div th:if="${importErrors != null}" class="mb-4 max-h-40 overflow-auto rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+    <p th:each="e : ${importErrors}" th:text="${e}">skipped</p></div>
+  <div th:if="${err != null}" class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" th:text="${err}"></div>
+
+  <h1 class="mb-1 text-xl font-semibold">Data cleanup</h1>
+  <p class="mb-5 text-sm text-gray-500">Permanently removes records from the database. This cannot be undone - take a backup first. Always click <b>Preview</b> before <b>Delete</b>.</p>
+
+  <section class="card mb-8 p-5">
+    <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Clear requests, logs and notifications</h2>
+    <div th:if="${result != null}" class="mb-4 rounded-md border p-3 text-sm" th:classappend="${dry} ? 'border-sky-200 bg-sky-50 text-sky-900' : 'border-green-200 bg-green-50 text-green-900'">
+      <p class="mb-1 font-semibold" th:text="${dry} ? 'Preview - nothing has been deleted yet:' : 'Deleted:'">Preview</p>
+      <p th:each="r : ${result}"><b th:text="${r.value}">0</b> <span th:text="${r.key}">items</span></p>
+    </div>
+    <form th:action="@{/admin/cleanup}" method="post" class="space-y-4">
+      <div>
+        <span class="label">Whose data?</span>
+        <div class="grid gap-2 text-sm md:grid-cols-2">
+          <label class="flex items-center gap-2"><input type="radio" name="scope" value="ALL" checked> Everyone</label>
+          <div class="flex items-center gap-2"><label class="flex items-center gap-2"><input type="radio" name="scope" value="PERSON"> One person</label>
+            <input class="input" name="person" placeholder="e-mail or register number"></div>
+          <div class="flex items-center gap-2"><label class="flex items-center gap-2"><input type="radio" name="scope" value="DEPT"> Branch</label>
+            <select class="input" name="dept"><option value="">Select</option><option th:each="d : ${departments}" th:value="${d.code}" th:text="${d.code}">CSE</option></select></div>
+          <div class="flex items-center gap-2"><label class="flex items-center gap-2"><input type="radio" name="scope" value="CLASS"> One class</label>
+            <select class="input" name="classId"><option value="">Select</option><option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.label}">class</option></select></div>
+        </div>
+      </div>
+      <div class="grid gap-3 md:grid-cols-2">
+        <div><label class="label">From date (optional)</label><input class="input" type="date" name="from"></div>
+        <div><label class="label">To date (optional)</label><input class="input" type="date" name="to"></div>
+      </div>
+      <div>
+        <span class="label">What to clear</span>
+        <div class="grid gap-1 text-sm md:grid-cols-2">
+          <label class="flex items-center gap-2"><input type="checkbox" name="requests"> Outpass requests (with approval history &amp; scans)</label>
+          <label class="flex items-center gap-2"><input type="checkbox" name="scans"> Gate scan log</label>
+          <label class="flex items-center gap-2"><input type="checkbox" name="notifications"> Notifications</label>
+          <label class="flex items-center gap-2"><input type="checkbox" name="auditLog"> Audit log</label>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-end gap-3 border-t border-gray-100 pt-4">
+        <button class="btn-outline" type="submit" name="mode" value="preview">Preview</button>
+        <div class="min-w-[12rem]"><label class="label">To delete, type DELETE</label><input class="input" name="confirm" autocomplete="off"></div>
+        <button class="btn-danger" type="submit" name="mode" value="delete">Delete permanently</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card p-5">
+    <h2 class="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500">Delete all accounts of one kind</h2>
+    <p class="mb-3 text-sm text-gray-500">Removes the accounts together with their requests, history and notifications. Admin accounts and your own account are never deleted. To delete selected people, use <a class="underline" th:href="@{/admin/users}">People</a>.</p>
+    <form th:action="@{/admin/cleanup/people}" method="post" class="flex flex-wrap items-end gap-3">
+      <div><label class="label">Accounts</label>
+        <select class="input" name="role"><option value="STUDENT">All students</option><option value="TUTOR">All tutors</option><option value="HOD">All HODs</option><option value="HEAD">All heads</option><option value="SECURITY">All security accounts</option></select></div>
+      <div class="min-w-[12rem]"><label class="label">Type DELETE to confirm</label><input class="input" name="confirm" autocomplete="off"></div>
+      <button class="btn-danger" type="submit">Delete all of this kind</button>
+    </form>
+  </section>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

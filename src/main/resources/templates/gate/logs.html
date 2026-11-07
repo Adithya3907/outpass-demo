@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Exit logs')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-6xl px-4 py-6">
+  <h1 class="mb-4 text-xl font-semibold">Gate exit logs</h1>
+  <form method="get" th:action="@{/gate/logs}" class="mb-5 flex flex-wrap items-end gap-3">
+    <div><label class="label" for="date">Date</label><input class="input" type="date" id="date" name="date" th:value="${day}"></div>
+    <div class="min-w-[16rem] flex-1"><label class="label" for="q">Student name or roll number</label><input class="input" id="q" name="q" th:value="${q}"></div>
+    <button class="btn-primary" type="submit">Show</button>
+  </form>
+  <div class="card overflow-x-auto">
+    <table class="tbl">
+      <thead><tr><th>Time</th><th>Student</th><th>Outpass</th><th>Gate</th><th>Result</th><th>Details</th><th>Scanned by</th></tr></thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr th:each="s : ${scans}">
+          <td th:text="${@fmt.dt(s.scannedAt)}">time</td>
+          <td>
+            <a th:if="${s.request != null}" class="font-medium text-brand underline" th:href="@{/gate/students/{id}(id=${s.request.student.id})}" th:text="${s.request.student.user.fullName + ' (' + s.request.student.rollNumber + ')'}">Name</a>
+            <span th:if="${s.request == null}" class="text-gray-500">Unknown QR</span>
+          </td>
+          <td th:text="${s.request != null} ? ${s.request.outpassCode} : '-'">code</td>
+          <td th:text="${s.gate != null} ? ${s.gate.name} : '-'">gate</td>
+          <td><span class="badge" th:classappend="${s.result.name() == 'SUCCESS'} ? 'bg-green-50 text-green-800 border-green-200' : 'bg-red-50 text-red-800 border-red-200'" th:text="${s.result.name()}">SUCCESS</span></td>
+          <td th:text="${s.reason != null} ? ${s.reason} : ''">reason</td>
+          <td th:text="${s.scannedBy != null} ? ${s.scannedBy.fullName} : '-'">guard</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(scans)}"><td colspan="7" class="py-8 text-center text-gray-500">No scans for this selection.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

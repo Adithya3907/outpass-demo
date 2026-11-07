@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('New outpass request')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-2xl px-4 py-6">
+  <div th:replace="~{fragments :: flash}"></div>
+  <div class="mb-4 flex items-end justify-between">
+    <div>
+      <h1 class="text-xl font-semibold">New outpass request</h1>
+      <p class="text-sm text-gray-500">Takes less than a minute. Once approved, your QR works from your planned exit time for 1 hour 15 minutes.</p>
+    </div>
+    <div class="text-right text-xs text-gray-500">Current time<br><span id="clock" class="text-sm font-semibold text-gray-800">--:--</span></div>
+  </div>
+
+  <form th:action="@{/student/new}" method="post" class="card space-y-5 p-6">
+    <div>
+      <label class="label" for="reason">Reason for leaving college *</label>
+      <select class="input" id="reason" name="reason" required>
+        <option value="">Select a reason</option>
+        <option th:each="rs : ${reasons}" th:value="${rs}" th:text="${rs}" th:selected="${form.reason == rs}">Going to home</option>
+      </select>
+      <div id="customBox" class="mt-2 hidden">
+        <input class="input" type="text" id="customReason" name="customReason" maxlength="200"
+               th:value="${form.customReason}" placeholder="Type your reason in less than 20 words">
+        <p class="mt-1 text-xs text-gray-500"><span id="wordCount">0</span>/20 words</p>
+      </div>
+    </div>
+
+    <div>
+      <span class="label">Date of permission *</span>
+      <div class="mb-2 grid grid-cols-3 gap-2">
+        <button type="button" th:each="d : ${days}" class="day-btn btn-outline flex-col !items-start !py-2 text-left"
+                th:attr="data-iso=${d.iso}">
+          <span class="text-sm font-semibold" th:text="${d.name}">Today</span>
+          <span class="text-xs font-normal text-gray-500" th:text="${d.label}">Sun, 01 Nov</span>
+        </button>
+      </div>
+      <input class="input" type="date" id="permissionDate" name="permissionDate" required
+             th:value="${form.permissionDate}" th:min="${today}" th:max="${maxDate}">
+      <p class="mt-1 text-xs text-gray-500">Selected: <span id="dateLabel" class="font-medium text-gray-700">-</span></p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <label class="label" for="exitTime">Planned exit time *</label>
+        <input class="input" type="time" id="exitTime" name="exitTime" required th:value="${form.exitTime}">
+      </div>
+      <div>
+        <label class="label" for="expectedReturnTime">Expected return time <span class="font-normal text-gray-400">(optional)</span></label>
+        <input class="input" type="time" id="expectedReturnTime" name="expectedReturnTime" th:value="${form.expectedReturnTime}">
+      </div>
+    </div>
+
+    <div>
+      <label class="label" for="description">Additional description <span class="font-normal text-gray-400">(optional)</span></label>
+      <textarea class="input" id="description" name="description" rows="2" maxlength="500" th:text="${form.description}"></textarea>
+    </div>
+
+    <div>
+      <label class="label" for="escalation">Send request to</label>
+      <select class="input" id="escalation" name="escalation">
+        <option th:each="e : ${escalations}" th:value="${e.name()}"
+                th:text="${e.name() == 'BACKUP'} ? ('Backup Tutors (from ' + ${student.classSection.department.code} + ' dept)') : ${e.label}"
+                th:selected="${form.escalation == e}">My Tutors</option>
+      </select>
+      <p class="mt-1 text-xs text-gray-500">Backup tutors are the other tutors of your department. Use them or the HOD only if your own tutors are unavailable.</p>
+    </div>
+
+    <div class="flex items-center justify-end gap-3 pt-1">
+      <a th:href="@{/student}" class="btn-outline">Cancel</a>
+      <button type="submit" class="btn-primary">Submit request</button>
+    </div>
+  </form>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+<script src="/js/new-request.js" th:src="@{/js/new-request.js}"></script>
+</body>
+</html>

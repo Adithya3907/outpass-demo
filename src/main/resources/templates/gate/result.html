@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <div th:fragment="result" id="result" th:attr="data-ok=${ok}" class="mt-6">
+    <div th:if="${ok}" class="rounded-xl border-4 border-green-600 bg-green-50 p-6">
+      <p class="text-center text-3xl font-extrabold tracking-wide text-green-800" th:text="${message}">VERIFIED</p>
+      <div class="mt-5 flex flex-wrap items-start gap-6">
+        <div th:replace="~{fragments :: avatar(${r.student.user.fullName}, ${r.student.rollNumber}, 120)}"></div>
+        <dl class="grid flex-1 grid-cols-1 gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
+          <div><dt class="text-green-900/70">Student</dt><dd class="text-lg font-semibold" th:text="${r.student.user.fullName}">Name</dd></div>
+          <div><dt class="text-green-900/70">Roll number</dt><dd class="text-lg font-semibold" th:text="${r.student.rollNumber}">Roll</dd></div>
+          <div><dt class="text-green-900/70">Class</dt><dd class="font-medium" th:text="${r.classSection.label}">class</dd></div>
+          <div><dt class="text-green-900/70">Reason</dt><dd class="font-medium" th:text="${r.reason}">reason</dd></div>
+          <div><dt class="text-green-900/70">Assigned tutors</dt><dd class="font-medium" th:text="${r.assignedTutorNames != null and r.assignedTutorNames != ''} ? ${r.assignedTutorNames} : '-'">tutors</dd></div>
+          <div><dt class="text-green-900/70">Approved by</dt><dd class="font-medium" th:text="${r.approvingFaculty.fullName}">faculty</dd></div>
+          <div><dt class="text-green-900/70">Approval time</dt><dd class="font-medium" th:text="${@fmt.dt(r.approvedAt)}">time</dd></div>
+          <div><dt class="text-green-900/70">Planned exit time</dt><dd class="font-medium"><span th:text="${@fmt.date(r.permissionDate)}">date</span>, <span th:text="${@fmt.time(r.exitTime)}">time</span></dd></div>
+          <div><dt class="text-green-900/70">Pass valid until</dt><dd class="font-medium" th:text="${@fmt.hm(r.expiresAt)}">time</dd></div>
+          <div><dt class="text-green-900/70">Gate</dt><dd class="font-medium" th:text="${gateName != null} ? ${gateName} : '-'">gate</dd></div>
+          <div><dt class="text-green-900/70">Outpass</dt><dd class="font-medium" th:text="${r.outpassCode}">code</dd></div>
+        </dl>
+      </div>
+    </div>
+    <div th:unless="${ok}" class="rounded-xl border-4 border-red-600 bg-red-50 p-6 text-center">
+      <p class="text-3xl font-extrabold tracking-wide text-red-800">ACCESS DENIED</p>
+      <p class="mt-2 text-xl font-semibold text-red-900" th:text="${message}">Reason</p>
+      <p th:if="${r != null}" class="mt-3 text-sm text-red-900">
+        <span th:text="${r.student.user.fullName}">Name</span> (<span th:text="${r.student.rollNumber}">roll</span>) &middot; <span th:text="${r.outpassCode}">code</span>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

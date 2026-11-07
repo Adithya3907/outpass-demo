@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('My account')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-lg px-4 py-8">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1 class="mb-1 text-xl font-semibold">My account</h1>
+  <p class="mb-5 text-sm text-gray-500"><span th:text="${me.fullName}">Name</span> &middot; <span th:text="${me.email}">email</span></p>
+
+  <div th:if="${needsPhone and (phone == null or phone == '')}" class="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+    Please add your phone number to continue. It is shown to your tutors and used for contact.
+  </div>
+
+  <form th:if="${showPhone}" th:action="@{/account/profile}" method="post" class="card mb-6 space-y-4 p-6">
+    <div>
+      <label class="label" for="phone">Phone number <span th:if="${phoneRequired}">*</span></label>
+      <input class="input" id="phone" name="phone" type="tel" th:value="${phone}" th:required="${phoneRequired}" placeholder="e.g. 9876543210"
+             pattern="\+?[0-9][0-9 \-]{8,18}[0-9]" title="10-15 digits">
+    </div>
+    <button class="btn-primary" type="submit">Save</button>
+  </form>
+
+  <div class="card divide-y divide-gray-100">
+    <a class="block p-4 hover:bg-gray-50" th:href="@{/account/notifications}"><b>Notification settings</b><br><span class="text-sm text-gray-500">Choose what you are notified about, and enable alerts on this phone</span></a>
+    <a th:if="${me.localLogin}" class="block p-4 hover:bg-gray-50" th:href="@{/account/password}"><b>Change password</b></a>
+    <p th:unless="${me.localLogin}" class="p-4 text-sm text-gray-500">You sign in with your college Google account, so there is no separate password.</p>
+  </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Try the demo')}"></head>
+<body class="bg-gray-50">
+<div th:replace="~{fragments :: demoBanner}"></div>
+<main class="mx-auto max-w-5xl px-4 py-10">
+  <div class="mb-8 text-center">
+    <img th:src="@{/img/psgitech-logo.png}" alt="PSG Institute of Technology and Applied Research" class="mx-auto h-14 w-auto">
+    <h1 class="mt-5 text-2xl font-bold text-gray-900">Outpass Management System - live demo</h1>
+    <p class="mx-auto mt-2 max-w-2xl text-sm text-gray-600">Pick any role below and use the system exactly as that person would. Everything here is <b>fictional sample data</b>; nothing is real and nothing is sent to anyone. The demo resets by itself every few minutes.</p>
+  </div>
+
+  <section class="card mb-8 p-5">
+    <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Try the whole flow in 2 minutes</h2>
+    <ol class="list-inside list-decimal space-y-1 text-sm text-gray-800">
+      <li>Enter as <b>Student</b> &rarr; <i>New outpass request</i> (choose a reason, keep today, send to My Tutors).</li>
+      <li>Click <b>Switch role</b> (yellow bar at the top) &rarr; enter as <b>Tutor</b> &rarr; open the request &rarr; press <b>Approve</b>.</li>
+      <li>Switch back to <b>Student</b> &rarr; open the request: your <b>QR code with a live countdown</b> appears.</li>
+      <li>Switch to <b>Security guard</b> &rarr; the gate page lists approved passes &rarr; press <b>Scan</b> &rarr; see the green <b>VERIFIED</b> screen.</li>
+      <li>Look around as <b>HOD</b>, <b>Principal</b> and <b>Admin</b> to see reports, downloads and management screens.</li>
+    </ol>
+  </section>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <form th:each="p : ${personas}" th:action="@{/demo/enter/{k}(k=${p.key})}" method="post" class="card flex flex-col justify-between p-5">
+      <div>
+        <h3 class="text-base font-semibold text-gray-900" th:text="${p.title}">Role</h3>
+        <p class="mt-1 text-sm text-gray-600" th:text="${p.blurb}">What this role does</p>
+      </div>
+      <button type="submit" class="btn-primary mt-4 w-full">Enter as this role</button>
+    </form>
+  </div>
+  <p class="mt-8 text-center text-xs text-gray-500">This is a demonstration copy. The real system signs in with college Google accounts.</p>
+</main>
+</body>
+</html>

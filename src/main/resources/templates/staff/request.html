@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Outpass request')}"></head>
+<body class="bg-white text-gray-900" data-live>
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-4xl px-4 py-6">
+  <div th:replace="~{fragments :: flash}"></div>
+  <a th:href="@{${backUrl}}" class="text-sm text-brand underline">&larr; Back</a>
+
+  <div class="mb-5 mt-3 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-4">
+      <div th:replace="~{fragments :: avatar(${r.student.user.fullName}, ${r.student.rollNumber}, 56)}"></div>
+      <div>
+        <h1 class="text-lg font-semibold" th:text="${r.student.user.fullName}">Student</h1>
+        <p class="text-sm text-gray-600">
+          <span class="font-medium" th:text="${r.student.rollNumber}">ROLL</span> &middot;
+          <span th:text="${r.classSection.label}">CSE - Year 1 - Section A</span> &middot;
+          Sem <span th:text="${r.classSection.semester}">1</span>
+        </p>
+        <p class="text-sm text-gray-600"><span th:text="${r.student.user.email}">email</span>
+          <span th:if="${r.student.phone != null}"> &middot; <span th:text="${r.student.phone}">phone</span></span></p>
+      </div>
+    </div>
+    <div class="text-right">
+      <span th:replace="~{fragments :: badge(${r.status})}"></span>
+      <p class="mt-1 text-xs text-gray-500" th:text="${r.outpassCode}">OP</p>
+    </div>
+  </div>
+
+  <section class="card mb-6 p-5">
+    <dl class="grid grid-cols-1 gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
+      <div><dt class="text-gray-500">Reason</dt><dd class="font-medium" th:text="${r.reason}">reason</dd></div>
+      <div><dt class="text-gray-500">Date</dt><dd class="font-medium" th:text="${@fmt.date(r.permissionDate)}">date</dd></div>
+      <div><dt class="text-gray-500">Planned exit time</dt><dd class="font-medium" th:text="${@fmt.time(r.exitTime)}">time</dd></div>
+      <div><dt class="text-gray-500">Expected return</dt><dd class="font-medium" th:text="${@fmt.time(r.expectedReturnTime)}">time</dd></div>
+      <div><dt class="text-gray-500">Planned exit &rarr; QR expires</dt><dd class="font-medium"><span th:text="${@fmt.hm(r.validFrom)}">10:00 AM</span> &ndash; <span th:text="${@fmt.hm(r.expiresAt)}">11:15 AM</span></dd></div>
+      <div><dt class="text-gray-500">Routed to</dt><dd class="font-medium" th:text="${r.escalation.label}">Tutors</dd></div>
+      <div><dt class="text-gray-500">Assigned tutors</dt><dd class="font-medium" th:text="${r.assignedTutorNames != null and r.assignedTutorNames != ''} ? ${r.assignedTutorNames} : '-'">A, B</dd></div>
+      <div th:if="${r.decisionOwner != null}"><dt class="text-gray-500">Decision owner</dt><dd class="font-medium" th:text="${r.decisionOwner.fullName}">owner</dd></div>
+      <div th:if="${r.hodApprover != null}"><dt class="text-gray-500">HOD decision by</dt><dd class="font-medium" th:text="${r.hodApprover.fullName}">hod</dd></div>
+      <div class="sm:col-span-2" th:if="${r.description != null}"><dt class="text-gray-500">Description</dt><dd th:text="${r.description}">text</dd></div>
+      <div th:if="${r.usedAt != null}"><dt class="text-gray-500">Gate scan</dt><dd class="font-medium"><span th:text="${@fmt.dt(r.usedAt)}">time</span> <span th:if="${r.usedGate != null}" th:text="'@ ' + ${r.usedGate.name}"></span></dd></div>
+    </dl>
+  </section>
+
+  <section th:if="${banner != null}" class="mb-6 rounded-xl p-5 text-center" th:classappend="${banner.css}">
+    <p class="text-2xl font-extrabold leading-snug md:text-3xl" th:text="'&#10003; ' + ${banner.headline}">&#10003; You APPROVED this request</p>
+    <p th:if="${banner.detail != ''}" class="mt-2 text-sm font-medium" th:text="${banner.detail}">details</p>
+  </section>
+
+  <section class="card mb-6 p-5">
+    <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500" th:text="${banner != null and canAct} ? 'Change your decision' : 'Your decision'">Your decision</h2>
+    <div th:if="${!canAct}" class="rounded-md border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700" th:text="${lockedMessage}">locked</div>
+    <form th:if="${canAct}" th:action="@{${postUrl}}" method="post" class="space-y-3">
+      <div>
+        <label class="label" for="remark">Remark (optional, shown to the student)</label>
+        <textarea class="input" id="remark" name="remark" rows="2" maxlength="500"></textarea>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button type="submit" name="action" th:each="a : ${actions}" th:value="${a.name()}"
+                class="btn" th:with="isChosen=${banner != null and banner.chosen == a.name()}"
+                th:classappend="${a.btnClass} + (${isChosen} ? ' !px-6 !py-3 !text-lg ring-4 ring-gray-900 ring-offset-2' : (${banner != null and banner.chosen != null} ? ' opacity-50' : ''))"
+                th:text="${isChosen} ? '&#10003; ' + ${a.label} + ' (selected)' : ${a.label}">Approve</button>
+      </div>
+      <p th:if="${r.decisionOwner != null and revisionsLeft >= 0 and (r.status.name() == 'APPROVED' or r.status.name() == 'DECLINED' or r.status.name() == 'PENDING_HOD')}"
+         class="text-xs text-gray-500">
+        Changing a decision uses one of your revisions: <b th:text="${revisionsLeft}">2</b> left. A changed decision revokes the existing QR code and any HOD approval.
+      </p>
+    </form>
+  </section>
+
+  <section class="card mb-6 p-5">
+    <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">History</h2>
+    <ol class="space-y-3 border-l-2 border-gray-200 pl-4">
+      <li th:each="t : ${timeline}" class="text-sm">
+        <p><span class="font-semibold" th:text="${t.action}">ACTION</span> by <span th:text="${t.actor.fullName}">Name</span>
+          <span th:if="${t.revisionNo > 0}" class="badge ml-1 border-gray-300 bg-gray-50 text-gray-600" th:text="'revision ' + ${t.revisionNo}">rev</span></p>
+        <p class="text-xs text-gray-500"><span th:text="${@fmt.dt(t.createdAt)}">time</span> &middot;
+          <span th:if="${t.previousStatus != null}"><span th:text="${t.previousStatus.label}">from</span> &rarr; </span><span th:text="${t.newStatus.label}">to</span></p>
+        <p th:if="${t.remark != null}" class="mt-0.5 text-gray-700" th:text="${t.remark}">remark</p>
+      </li>
+    </ol>
+  </section>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

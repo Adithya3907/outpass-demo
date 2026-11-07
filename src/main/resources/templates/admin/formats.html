@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('CSV formats')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-5xl px-4 py-6">
+  <a th:href="@{/admin/users}" class="text-sm text-brand underline">&larr; People</a>
+  <h1 class="mb-1 mt-3 text-xl font-semibold">CSV formats for adding or updating people</h1>
+  <p class="mb-5 text-sm text-gray-500">Save from Excel as <b>CSV UTF-8</b>. The first row must be the header exactly as shown. Upload it under People &rarr; <i>Upload a CSV file</i>. The files you download from the portal use the same columns, so you can edit a download and upload it back.</p>
+
+  <div class="mb-6 rounded-md border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+    <b>How rows are treated</b>
+    <ul class="mt-1 list-inside list-disc">
+      <li>The <b>e-mail</b> identifies the person. A new e-mail creates an account; an existing e-mail updates that person's details.</li>
+      <li>Everyone signs in with their <b>college Google account</b> (the e-mail in the file), so no passwords are involved. Students add their phone number at first login.</li>
+      <li>A row with a problem is skipped and listed after the upload; the other rows still import.</li>
+      <li>Empty optional cells leave the existing value unchanged.</li>
+    </ul>
+  </div>
+
+  <section class="card mb-8 p-5">
+    <h2 class="text-lg font-semibold">1. Students</h2>
+    <pre class="mt-3 overflow-x-auto rounded bg-gray-50 p-3 text-xs">name,register_number,email,admission_year,branch,section,phone,active
+Aarav Kumar,715526104001,student1@example.edu,2026,CSE,A,9876543210,true
+Divya Raj,715525104002,student2@example.edu,2025,CSE,A,,</pre>
+    <table class="tbl mt-3">
+      <thead><tr><th>Column</th><th>Required</th><th>Meaning</th></tr></thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr><td><code>name</code></td><td>yes</td><td>Full name</td></tr>
+        <tr><td><code>register_number</code></td><td>yes</td><td>Unique register number</td></tr>
+        <tr><td><code>email</code></td><td>yes</td><td>College e-mail = login</td></tr>
+        <tr><td><code>admission_year</code></td><td>yes</td><td>Year of joining, e.g. <b th:text="${admissionYear}">2026</b> = first year this academic year. The class year is worked out from it.</td></tr>
+        <tr><td><code>branch</code></td><td>yes</td><td>Branch code from the list below</td></tr>
+        <tr><td><code>section</code></td><td>yes</td><td>Section letter, e.g. A (the class is created automatically if new)</td></tr>
+        <tr><td><code>phone</code></td><td>no</td><td>10-15 digits; students enter it at first login if empty</td></tr>
+        <tr><td><code>active</code></td><td>no</td><td><code>true</code> / <code>false</code>. Empty = active for current students, disabled for students who have already completed their course</td></tr>
+      </tbody>
+    </table>
+    <a class="btn-outline mt-3" th:href="@{/export/template/students.csv}">Download students template</a>
+  </section>
+
+  <section class="card mb-8 p-5">
+    <h2 class="text-lg font-semibold">2. Staff (tutors / mentors and HODs)</h2>
+    <pre class="mt-3 overflow-x-auto rounded bg-gray-50 p-3 text-xs">name,email,phone,branch,role,mentor_classes
+Dr. Meena S,meena@psgitech.ac.in,9876500001,CSE,TUTOR,1-A;2-A
+Dr. Ravi K,hodcse@psgitech.ac.in,9876500002,CSE,HOD,</pre>
+    <table class="tbl mt-3">
+      <thead><tr><th>Column</th><th>Required</th><th>Meaning</th></tr></thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr><td><code>name</code>, <code>email</code></td><td>yes</td><td>Full name and college e-mail (login)</td></tr>
+        <tr><td><code>phone</code></td><td>recommended</td><td>Mobile number shown to the students they mentor</td></tr>
+        <tr><td><code>branch</code></td><td>yes for new staff</td><td>Branch code. A person can only mentor classes of their own branch</td></tr>
+        <tr><td><code>role</code></td><td>no</td><td><code>TUTOR</code> (default) or <code>HOD</code> (becomes the HOD of that branch, replacing the previous one)</td></tr>
+        <tr><td><code>mentor_classes</code></td><td>no</td><td>Classes mentored, <code>year-section</code> separated by <code>;</code> e.g. <code>1-A;2-B</code> (year of study 1-4). If filled, it replaces their current list. Each class can have at most two mentors.</td></tr>
+      </tbody>
+    </table>
+    <p class="mt-2 text-xs text-gray-500"><b>Backup tutors</b> need no column: every tutor of a branch is automatically a backup for the other classes of that branch.</p>
+    <a class="btn-outline mt-3" th:href="@{/export/template/staff.csv}">Download staff template</a>
+  </section>
+
+  <section class="card mb-8 p-5">
+    <h2 class="text-lg font-semibold">3. Heads (Principal, Dean, Secretary - view-only access to all students)</h2>
+    <pre class="mt-3 overflow-x-auto rounded bg-gray-50 p-3 text-xs">name,email
+Principal,principal@psgitech.ac.in</pre>
+    <a class="btn-outline mt-3" th:href="@{/export/template/heads.csv}">Download heads template</a>
+  </section>
+
+  <section class="card p-5">
+    <h2 class="text-lg font-semibold">Branch codes</h2>
+    <p class="mb-2 text-sm text-gray-500">Use the code (or the full name). Add new branches under Structure.</p>
+    <table class="tbl"><thead><tr><th>Code</th><th>Name</th></tr></thead>
+      <tbody class="divide-y divide-gray-100"><tr th:each="d : ${departments}"><td class="font-medium" th:text="${d.code}">CSE</td><td th:text="${d.name}">name</td></tr></tbody></table>
+  </section>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

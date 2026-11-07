@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Outpass')}"></head>
+<body class="bg-white text-gray-900" data-live>
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-4xl px-4 py-6">
+  <div th:replace="~{fragments :: flash}"></div>
+  <a th:href="@{/student}" class="text-sm text-brand underline">&larr; All outpasses</a>
+
+  <div class="mb-5 mt-3 flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-xl font-semibold" th:text="${r.outpassCode}">OP-2026-000001</h1>
+      <p class="text-sm text-gray-500">Submitted <span th:text="${@fmt.dt(r.createdAt)}">time</span></p>
+    </div>
+    <span th:replace="~{fragments :: badge(${r.status})}"></span>
+  </div>
+
+  <section th:if="${r.status.name() == 'USED'}" class="mb-6 rounded-lg border-2 border-emerald-500 bg-emerald-50 p-6 text-center">
+    <p class="text-2xl font-bold tracking-wide text-emerald-800">OUTPASS VERIFIED!</p>
+    <p class="mt-2 text-sm text-emerald-900">Your outpass has been successfully scanned and verified at the college gate.</p>
+    <p class="text-base font-semibold text-emerald-900">You may leave the campus.</p>
+    <dl class="mx-auto mt-4 grid max-w-md grid-cols-2 gap-x-4 gap-y-1 text-left text-sm text-emerald-900">
+      <dt class="font-medium">Scanned at</dt><dd th:text="${@fmt.dt(r.usedAt)}">time</dd>
+      <dt class="font-medium">Gate</dt><dd th:text="${r.usedGate != null} ? ${r.usedGate.name} : '-'">Main Gate</dd>
+      <dt class="font-medium">Outpass ID</dt><dd th:text="${r.outpassCode}">id</dd>
+      <dt class="font-medium">Security status</dt><dd>Verified</dd>
+    </dl>
+    <a th:href="@{/student/requests/{id}/pass.pdf(id=${r.id})}" class="btn-outline mt-5">Download outpass PDF</a>
+  </section>
+
+  <section th:if="${r.status.name() == 'APPROVED'}" class="card mb-6 p-6 text-center">
+    <p class="text-sm font-medium text-green-800">Approved by <span th:text="${r.approvingFaculty.fullName}">Faculty</span> &middot; <span th:text="${@fmt.dt(r.approvedAt)}">time</span></p>
+    <img th:src="@{/student/requests/{id}/qr.png(id=${r.id})}" alt="Your outpass QR code" class="mx-auto my-4 h-64 w-64 rounded border border-gray-200 p-2">
+    <div class="mx-auto mt-2 max-w-md rounded-lg border border-green-200 bg-green-50 p-4 text-green-900">
+      <p class="text-xs font-semibold uppercase tracking-wide text-green-800">Planned exit time</p>
+      <p class="text-3xl font-bold" th:text="${@fmt.time(r.exitTime)}">10:00 AM</p>
+      <p class="text-sm" th:text="${@fmt.date(r.permissionDate)}">Mon, 02 Nov 2026</p>
+      <hr class="my-3 border-green-200">
+      <p class="text-xs font-semibold uppercase tracking-wide text-green-800" id="countdownLabel">QR expires in</p>
+      <p id="countdown" class="font-mono text-4xl font-bold tabular-nums" th:attr="data-from=${scanFrom.toEpochMilli()},data-expires=${r.expiresAt.toEpochMilli()}">--:--</p>
+      <div class="mt-2 h-2 w-full overflow-hidden rounded bg-green-100"><div id="countbar" class="h-2 rounded bg-green-600" style="width:100%"></div></div>
+      <p class="mt-2 text-sm">Expires at <b th:text="${@fmt.dt(r.expiresAt)}">time</b></p>
+      <p class="text-xs text-green-800">Works from <span th:text="${@fmt.dt(scanFrom)}">time</span> (up to 2 hours before your planned exit) until it expires.</p>
+    </div>
+    <p class="mt-3 text-xs text-gray-500">Show this QR code to the security desk at the gate. It works only once, and only until it expires.</p>
+    <div class="mx-auto mt-4 max-w-xl rounded-md border border-red-300 bg-red-50 p-4 text-left">
+      <p class="text-sm font-bold text-red-800">IMPORTANT SECURITY WARNING</p>
+      <p class="mt-1 text-sm text-red-900">Do not share your QR code, screenshot or digital outpass with anyone else. This QR is uniquely assigned to your permission and can authorize your campus exit. Display it only to authorized college security personnel.</p>
+    </div>
+    <div th:if="${demoMode}" class="mx-auto mt-4 max-w-xl rounded-md border border-amber-300 bg-amber-50 p-3 text-left text-xs text-amber-900">
+      <b>Demo only:</b> in real life the guard's USB scanner reads the QR. For this demo, open <i>Switch role &rarr; Security guard</i> and press <b>Scan</b> next to this pass.
+    </div>
+    <a th:href="@{/student/requests/{id}/pass.pdf(id=${r.id})}" class="btn-outline mt-5">Download outpass PDF</a>
+  </section>
+
+  <section th:if="${r.status.name() == 'EXPIRED'}" class="mb-6 rounded-md border border-orange-200 bg-orange-50 p-4 text-sm text-orange-900">
+    <b>This outpass has expired.</b> It was valid until <span th:text="${@fmt.dt(r.expiresAt)}">time</span> and can no longer be scanned. Please submit a new request if you still need to leave.
+    <a th:href="@{/student/new}" class="ml-1 font-semibold underline">New request</a>
+  </section>
+
+  <section th:if="${r.status.name() == 'MEET_IN_PERSON'}" class="mb-6 rounded-md border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+    <b th:text="${r.decisionOwner.fullName}">Tutor</b> has asked you to meet in person. They will record the final decision after meeting you.
+  </section>
+  <section th:if="${r.status.name() == 'DECLINED'}" class="mb-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+    This request was declined<span th:if="${r.hodApprover != null}"> by the HOD</span><span th:if="${r.hodApprover == null and r.decisionOwner != null}"> by <b th:text="${r.decisionOwner.fullName}">Tutor</b></span>.
+    <span th:if="${(r.hodApprover != null ? r.hodRemark : r.decisionRemark) != null}">Reason: <i th:text="${r.hodApprover != null ? r.hodRemark : r.decisionRemark}">remark</i></span>
+  </section>
+
+  <section class="card mb-6 p-5">
+    <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Request details</h2>
+    <dl class="grid grid-cols-1 gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
+      <div><dt class="text-gray-500">Reason</dt><dd class="font-medium" th:text="${r.reason}">Going home</dd></div>
+      <div><dt class="text-gray-500">Date</dt><dd class="font-medium" th:text="${@fmt.date(r.permissionDate)}">date</dd></div>
+      <div><dt class="text-gray-500">Planned exit time</dt><dd class="font-medium" th:text="${@fmt.time(r.exitTime)}">time</dd></div>
+      <div><dt class="text-gray-500">Expected return</dt><dd class="font-medium" th:text="${@fmt.time(r.expectedReturnTime)}">time</dd></div>
+      <div><dt class="text-gray-500">Sent to</dt><dd class="font-medium" th:text="${r.escalation.label}">Tutors</dd></div>
+      <div><dt class="text-gray-500">Planned exit &rarr; QR expires</dt><dd class="font-medium"><span th:text="${@fmt.hm(r.validFrom)}">10:00 AM</span> &ndash; <span th:text="${@fmt.hm(r.expiresAt)}">11:15 AM</span></dd></div>
+      <div class="sm:col-span-2"><dt class="text-gray-500">Your tutors</dt>
+        <dd th:each="t : ${tutors}" class="text-sm"><span class="font-medium" th:text="${t.user.fullName}">Tutor</span>
+          <span class="text-gray-600"> &middot; <span th:text="${t.phone != null} ? ${t.phone} : 'no phone on file'">phone</span> &middot; <span th:text="${t.user.email}">email</span></span></dd>
+        <dd th:if="${#lists.isEmpty(tutors)}" class="font-medium">-</dd></div>
+      <div class="sm:col-span-2" th:if="${r.description != null}"><dt class="text-gray-500">Description</dt><dd th:text="${r.description}">text</dd></div>
+    </dl>
+  </section>
+
+  <section class="card mb-6 p-5">
+    <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Approval history</h2>
+    <ol class="space-y-3 border-l-2 border-gray-200 pl-4">
+      <li th:each="t : ${timeline}" class="text-sm">
+        <p><span class="font-semibold" th:text="${t.action}">ACTION</span> by <span th:text="${t.actor.fullName}">Name</span>
+          <span th:if="${t.revisionNo > 0}" class="badge ml-1 border-gray-300 bg-gray-50 text-gray-600" th:text="'revision ' + ${t.revisionNo}">revision 1</span></p>
+        <p class="text-xs text-gray-500"><span th:text="${@fmt.dt(t.createdAt)}">time</span>
+          <span th:if="${t.previousStatus != null}"> &middot; <span th:text="${t.previousStatus.label}">from</span> &rarr; </span>
+          <span th:unless="${t.previousStatus != null}"> &middot; </span><span th:text="${t.newStatus.label}">to</span></p>
+        <p th:if="${t.remark != null}" class="mt-0.5 text-gray-700" th:text="${t.remark}">remark</p>
+      </li>
+    </ol>
+  </section>
+
+  <form th:if="${r.withdrawable}" th:action="@{/student/requests/{id}/withdraw(id=${r.id})}" method="post"
+        onsubmit="return confirm('Delete this outpass request? This cannot be undone.');">
+    <button type="submit" class="btn-danger">Delete request</button>
+    <p class="mt-1 text-xs text-gray-500">Available only until a tutor takes action.</p>
+  </form>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+<script th:src="@{/js/countdown.js}"></script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Edit person')}"></head>
+<body class="bg-white text-gray-900">
+<header th:replace="~{fragments :: nav}"></header>
+<main class="mx-auto max-w-3xl px-4 py-6">
+  <div th:replace="~{fragments :: flash}"></div>
+  <a th:href="@{/admin/users}" class="text-sm text-brand underline">&larr; All people</a>
+  <h1 class="mb-1 mt-3 text-xl font-semibold" th:text="${u.fullName}">Name</h1>
+  <p class="mb-5 text-sm text-gray-500"><span th:text="${u.role.name()}">ROLE</span> &middot; <span th:text="${u.email}">email</span></p>
+
+  <!-- STUDENT -->
+  <form th:if="${sp != null}" th:action="@{/admin/users/{id}/student(id=${u.id})}" method="post" class="card mb-6 grid grid-cols-2 gap-3 p-5">
+    <div class="col-span-2"><label class="label">Full name</label><input class="input" name="name" th:value="${u.fullName}" required></div>
+    <div class="col-span-2"><label class="label">E-mail (login)</label><input class="input" type="email" name="email" th:value="${u.email}" required></div>
+    <div><label class="label">Register number</label><input class="input" name="roll" th:value="${sp.rollNumber}" required></div>
+    <div><label class="label">Phone</label><input class="input" name="phone" th:value="${sp.phone}"></div>
+    <div class="col-span-2"><label class="label">Class (branch - year - section)</label>
+      <select class="input" name="classId"><option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.label}" th:selected="${c.id == sp.classSection.id}">class</option></select>
+      <p class="mt-1 text-xs text-gray-500">Year of admission: <b th:text="${admissionYear}">2026</b>. To put a student in a section that does not exist yet, create the class under Structure first.</p></div>
+    <label class="col-span-2 flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" th:checked="${u.enabled}"> Account active (can sign in)</label>
+    <button class="btn-primary col-span-2" type="submit">Save changes</button>
+  </form>
+
+  <!-- STAFF -->
+  <form th:if="${fp != null}" th:action="@{/admin/users/{id}/staff(id=${u.id})}" method="post" class="card mb-6 grid grid-cols-2 gap-3 p-5">
+    <div class="col-span-2"><label class="label">Full name</label><input class="input" name="name" th:value="${u.fullName}" required></div>
+    <div class="col-span-2"><label class="label">E-mail (login)</label><input class="input" type="email" name="email" th:value="${u.email}" required></div>
+    <div><label class="label">Phone</label><input class="input" name="phone" th:value="${fp.phone}"></div>
+    <div><label class="label">Branch</label>
+      <select class="input" name="deptId"><option th:each="d : ${departments}" th:value="${d.id}" th:text="${d.code + ' - ' + d.name}" th:selected="${d.id == fp.department.id}">CSE</option></select></div>
+    <div class="col-span-2"><label class="label">Role</label>
+      <select class="input" name="role"><option value="TUTOR" th:selected="${!isHod}">Tutor / mentor</option><option value="HOD" th:selected="${isHod}">Head of Department (of this branch)</option></select></div>
+    <div class="col-span-2">
+      <span class="label">Classes mentored (max two tutors per class)</span>
+      <div class="grid grid-cols-2 gap-1 text-sm md:grid-cols-3">
+        <label th:each="c : ${deptClasses}" class="flex items-center gap-2"><input type="checkbox" name="mentor" th:value="${c.id}" th:checked="${mentoring.contains(c.id)}"> <span th:text="${c.label}">class</span></label>
+      </div>
+      <p th:if="${#lists.isEmpty(deptClasses)}" class="text-xs text-gray-500">No classes exist for this branch yet.</p>
+      <p class="mt-2 text-xs text-gray-500">Backup duty: this person automatically acts as a backup tutor for the other classes of <b th:text="${fp.department.code}">CSE</b>.</p>
+    </div>
+    <label class="col-span-2 flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" th:checked="${u.enabled}"> Account active (can sign in)</label>
+    <button class="btn-primary col-span-2" type="submit">Save changes</button>
+  </form>
+
+  <!-- OTHER -->
+  <form th:if="${sp == null and fp == null}" th:action="@{/admin/users/{id}/basic(id=${u.id})}" method="post" class="card mb-6 grid grid-cols-2 gap-3 p-5">
+    <div class="col-span-2"><label class="label">Full name</label><input class="input" name="name" th:value="${u.fullName}" required></div>
+    <div class="col-span-2"><label class="label">E-mail (login)</label><input class="input" type="email" name="email" th:value="${u.email}" required></div>
+    <label class="col-span-2 flex items-center gap-2 text-sm"><input type="checkbox" name="enabled" th:checked="${u.enabled}"> Account active (can sign in)</label>
+    <button class="btn-primary col-span-2" type="submit">Save changes</button>
+  </form>
+
+  <section class="card p-5">
+    <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Sign-in method</h2>
+    <form th:action="@{/admin/users/{id}/login-mode(id=${u.id})}" method="post" class="mb-4 flex flex-wrap items-center gap-3">
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="passwordLogin" th:checked="${u.localLogin}"> Allow password sign-in (for people without a college Google account)</label>
+      <button class="btn-outline" type="submit">Save</button>
+    </form>
+    <p th:unless="${u.localLogin}" class="text-sm text-gray-600">This person signs in with <b>Google</b> using <b th:text="${u.email}">email</b>. There is no password to reset.</p>
+    <form th:if="${u.localLogin}" th:action="@{/admin/users/{id}/password(id=${u.id})}" method="post" class="flex flex-wrap items-end gap-3">
+      <div class="min-w-[14rem] flex-1"><label class="label">New password (leave empty for the default <b th:text="${defaultPassword}">pw</b>)</label><input class="input" name="custom" autocomplete="off"></div>
+      <button class="btn-outline" type="submit">Reset password</button>
+    </form>
+    <p th:if="${u.localLogin}" class="mt-2 text-xs text-gray-500">The person must choose a new password at their next login.</p>
+  </section>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

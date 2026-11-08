@@ -1,0 +1,17 @@
+name: Keep Outpass Demo Alive
+
+on:
+  schedule:
+    # Triggers every 14 minutes (Render free tier sleeps after 15 mins)
+    - cron: '*/14 * * * *'
+  # Allows you to manually trigger this action anytime from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  ping-render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send HTTP Request to Render
+        run: |
+          curl -I -s https://onrender.com
+          
